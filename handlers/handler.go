@@ -61,6 +61,11 @@ func (handler *CompaniesHandler) PostCompany(w http.ResponseWriter, r *http.Requ
 
 //ListAllCompanies list details about all companies
 func (handler *CompaniesHandler) ListAllCompanies(w http.ResponseWriter, r *http.Request) {
+	ip := r.RemoteAddr
+	xforward := r.Header.Get("X-Forwarded-For")
+	fmt.Println("IP : ", ip)
+	fmt.Println("X-Forwarded-For : ", xforward)
+
 	lstCompanies, err := handler.CompanyService.GetListOfAllCompanies()
 	if err != nil {
 		fmt.Println(err)

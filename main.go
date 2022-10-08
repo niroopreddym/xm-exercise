@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/niroopreddym/xm-exercise/handlers"
+	"github.com/niroopreddym/xm-exercise/helpers"
 	"github.com/niroopreddym/xm-exercise/services"
 )
 
@@ -37,5 +38,27 @@ func main() {
 
 	router.HandleFunc("/getjwttoken", authHandler.GenerateToken).Methods("GET")
 
-	http.ListenAndServe(":9294", router)
+	muxServerWrapped := getServerConfig(router)
+	muxServerWrapped.ListenAndServe()
+}
+
+func getServerConfig(router *mux.Router) *http.Server {
+	apiServer := &http.Server{
+		Addr: "127.0.0.1:9294",
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+			// get the real IP of the user, see below
+			addr := helpers.GetClientIP(req)
+
+			// the actual vaildation - replace with whatever you want
+			if !helpers.IsValidRequest(addr) {
+				http.Error(w, "Blocked", 401)
+				return
+			}
+
+			// pass the request to the mux
+			router.ServeHTTP(w, req)
+		}),
+	}
+
+	return apiServer
 }
