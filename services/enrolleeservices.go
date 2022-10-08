@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"net/http"
 	"strconv"
 
 	"github.com/niroopreddym/xm-exercise/database"
@@ -23,8 +22,23 @@ func NewDatabaseServicesInstance() *DatabaseService {
 	}
 }
 
-//GetListOfAllAvailableProducts get list of all available products
-func (service *DatabaseService) GetListOfAllAvailableProducts(productID int) (*models.Company, error) {
+//CreateCompany ...
+func (service *DatabaseService) CreateCompany(company *models.Company) (int, error) {
+	defer service.DatabaseService.DbClose()
+
+	insertStat := `insert into Company(name, code, country, website, phone) VALUES ($1, $2, $3, $4, $5)`
+
+	companyID, err := service.DatabaseService.DbExecuteScalarReturningID(insertStat, company.Name, company.Code, company.Country, company.Website, company.Phone)
+
+	if err != nil {
+		log.Println(err)
+		return 0, err
+	}
+	return companyID, nil
+}
+
+//GetListOfAllCompanies get list of all available products
+func (service *DatabaseService) GetListOfAllCompanies(productID int) (*models.Company, error) {
 	defer service.DatabaseService.DbClose()
 	query := "select * from public.products where id = " + strconv.Itoa(productID)
 	tx, err := service.DatabaseService.TxBegin()
@@ -55,27 +69,27 @@ func (service *DatabaseService) GetListOfAllAvailableProducts(productID int) (*m
 	return txResult, nil
 }
 
-//UpdateProductsCountToInventory adds products to the inventory
-func (service *DatabaseService) UpdateProductsCountToInventory(product models.Company) (int, error) {
-	query := "select AddProductsQuantity(" + strconv.Itoa(product.ID) + "," + strconv.Itoa(1) + ")"
+// //UpdateProductsCountToInventory adds products to the inventory
+// func (service *DatabaseService) UpdateProductsCountToInventory(product models.Company) (int, error) {
+// 	query := "select AddProductsQuantity(" + strconv.Itoa(product.ID) + "," + strconv.Itoa(1) + ")"
 
-	tx, err := service.DatabaseService.TxBegin()
-	_, err = service.DatabaseService.TxExecuteStmt(tx, query)
+// 	tx, err := service.DatabaseService.TxBegin()
+// 	_, err = service.DatabaseService.TxExecuteStmt(tx, query)
 
-	defer service.DatabaseService.DbClose()
-	if err != nil {
-		return int(http.StatusInternalServerError), errors.New("internal server error")
-	}
+// 	defer service.DatabaseService.DbClose()
+// 	if err != nil {
+// 		return int(http.StatusInternalServerError), errors.New("internal server error")
+// 	}
 
-	if err = service.DatabaseService.TxComplete(tx); err != nil {
-		return int(http.StatusInternalServerError), errors.New("internal server error")
-	}
+// 	if err = service.DatabaseService.TxComplete(tx); err != nil {
+// 		return int(http.StatusInternalServerError), errors.New("internal server error")
+// 	}
 
-	return int(http.StatusOK), nil
-}
+// 	return int(http.StatusOK), nil
+// }
 
-//BookProducts adds products to the inventory
-func (service *DatabaseService) BookProducts(productID int, noOfProductsBooked int) error {
+//GetCompanyDetails adds products to the inventory
+func (service *DatabaseService) GetCompanyDetails(productID int, noOfProductsBooked int) error {
 	defer service.DatabaseService.DbClose()
 	query := "select BookProducts(" + strconv.Itoa(productID) + "," + strconv.Itoa(noOfProductsBooked) + ")"
 

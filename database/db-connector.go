@@ -3,6 +3,8 @@ package database
 import (
 	"context"
 	"fmt"
+	"log"
+	"os"
 
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgx/v4"
@@ -32,9 +34,16 @@ func DBNewHandler() *DBHandler {
 
 // SetConnectionStrings ...
 func SetConnectionStrings() {
-	// "server=192.168.99.100 port=5432 user=postgres password=postgres sslmode=disable dbname=testdb"
-	ReaderConnectionString = "postgres://postgres:postgres@192.168.99.100:5432/testdb"
-	WriterConnectionString = "postgres://postgres:postgres@192.168.99.100:5432/testdb"
+	ReaderConnectionString = fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=disable", "postgres", "postgres", "localhost", 5432, "companiesdb")
+	WriterConnectionString = fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=disable", "postgres", "postgres", "localhost", 5432, "companiesdb")
+}
+
+func getEnv(key, defaultValue string) string {
+	value := os.Getenv(key)
+	if value == "" {
+		return defaultValue
+	}
+	return value
 }
 
 // InitDbReader : for the database at the global space
@@ -71,7 +80,7 @@ func (dbService DBHandler) CreateConnection(connectionString string) (*pgx.Conn,
 func (dbService DBHandler) DbClose() {
 	err := DB.Close(context.Background())
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 	}
 }
 
@@ -88,6 +97,19 @@ func (dbService DBHandler) TxQuery(tx pgx.Tx, query string) (pgx.Rows, error) {
 	return rows, nil
 }
 
+//TxCreateTempTable : To execute a query and fetch rows. This will typically perform an insert & select (or) a plain select.
+func (dbService DBHandler) TxCreateTempTable(tx pgx.Tx, tblName string, sql string) (*pgconn.StatementDescription, error) {
+	statDesc, err := tx.Prepare(context.Background(), tblName, sql)
+	if err != nil {
+		if rberror := tx.Rollback(context.Background()); rberror != nil {
+			return nil, rberror
+		}
+		return nil, err
+	}
+
+	return statDesc, nil
+}
+
 //TxBegin : To begin transaction.
 func (dbService DBHandler) TxBegin() (pgx.Tx, error) {
 	var err error
@@ -98,18 +120,6 @@ func (dbService DBHandler) TxBegin() (pgx.Tx, error) {
 
 	tx, err := DB.Begin(context.Background())
 	return tx, err
-}
-
-//TxExecuteStmt : Executes the Query. Usually an INSERT/UPDATE.
-func (dbService DBHandler) TxExecuteStmt(tx pgx.Tx, query string, args ...interface{}) (pgconn.CommandTag, error) {
-	res, err := tx.Exec(context.Background(), query, args...)
-	if err != nil {
-		if rberror := tx.Rollback(context.Background()); rberror != nil {
-			return nil, rberror
-		}
-		return nil, err
-	}
-	return res, nil
 }
 
 // TxComplete : Save Changes to the Database.

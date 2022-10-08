@@ -20,42 +20,17 @@ func (dbService DBHandler) DbExecuteScalar(query string, args ...interface{}) (p
 	return nil, err
 }
 
-// DbExecuteConflict : To check foreign key violations...
-func (dbService DBHandler) DbExecuteConflict(query string, args ...interface{}) error {
+// DbExecuteScalarReturningID : To insert/update records returns ids.
+func (dbService DBHandler) DbExecuteScalarReturningID(query string, args ...interface{}) (int, error) {
 	var err error
 	DB, err = dbService.InitDbWriter()
+	returningid := 0
 	if err == nil {
-		_, exeError := DB.Exec(context.Background(), query, args...)
-		if exeError != nil {
-			return exeError
+		err = DB.QueryRow(context.Background(), query, args...).Scan(&returningid)
+		if err != nil {
+			return 0, err
 		}
-	}
-	return nil
-}
-
-// DbWriter : To insert/update records in the database.
-func (dbService DBHandler) DbWriter(query string) error {
-	var err error
-	DB, err = dbService.InitDbWriter()
-	if err == nil {
-		_, exeError := DB.Query(context.Background(), query)
-		return exeError
-	}
-	return err
-}
-
-// DbExecuteQuery : To execute queries.
-func (dbService DBHandler) DbExecuteQuery(query string) (int64, error) {
-	var err error
-	DB, err = dbService.InitDbWriter()
-	if err == nil {
-		rows, execErr := DB.Exec(context.Background(), query)
-		if execErr == nil {
-			var rowAffected int64
-			rowAffected = rows.RowsAffected()
-			return rowAffected, nil
-		}
-		return 0, execErr
+		return returningid, nil
 	}
 	return 0, err
 }
