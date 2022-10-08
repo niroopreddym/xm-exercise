@@ -30,9 +30,9 @@ func main() {
 
 	fmt.Println("started listening on port : ", 9294)
 	router.Handle("/companies", jwtMiddlewareInstance.Handler(http.HandlerFunc(handler.PostCompany))).Methods("POST")
-	router.Handle("/companies", jwtMiddlewareInstance.Handler(http.HandlerFunc(handler.ListAllCompanies))).Methods("GET")
-	router.Handle("/companies/{company_id}", jwtMiddlewareInstance.Handler(http.HandlerFunc(handler.GetCompanyDetails))).Methods("GET")
-	router.Handle("/companies/{company_id}", jwtMiddlewareInstance.Handler(http.HandlerFunc(handler.PutCompanyDetails))).Methods("PUT")
+	router.Handle("/companies", http.HandlerFunc(handler.ListAllCompanies)).Methods("GET")
+	router.Handle("/companies/{company_id}", http.HandlerFunc(handler.GetCompanyDetails)).Methods("GET")
+	router.Handle("/companies/{company_id}", http.HandlerFunc(handler.PutCompanyDetails)).Methods("PUT")
 	router.Handle("/companies/{company_id}", jwtMiddlewareInstance.Handler(http.HandlerFunc(handler.DeleteCompanyDetails))).Methods("DELETE")
 
 	router.HandleFunc("/getjwttoken", authHandler.GenerateToken).Methods("GET")
