@@ -15,8 +15,8 @@ var mySigningKey = []byte("ultimateStarAjith")
 type AuthHandler struct {
 }
 
-//NewAuthHandler returns a new instance of the Auth Handler
-func NewAuthHandler() *AuthHandler {
+//NewMiddlewareHandler returns a new instance of the middleware Handler
+func NewMiddlewareHandler() *AuthHandler {
 	return &AuthHandler{}
 }
 

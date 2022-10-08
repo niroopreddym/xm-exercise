@@ -9,7 +9,6 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/niroopreddym/xm-exercise/handlers"
-	"github.com/niroopreddym/xm-exercise/helpers"
 	"github.com/niroopreddym/xm-exercise/services"
 )
 
@@ -27,38 +26,26 @@ func main() {
 	dbInstance := services.NewDatabaseServicesInstance()
 	router := mux.NewRouter()
 	handler := handlers.NewCompaniesHandler(dbInstance)
-	authHandler := handlers.NewAuthHandler()
+	middlewareHandler := handlers.NewMiddlewareHandler()
 
 	fmt.Println("started listening on port : ", 9294)
-	router.Handle("/companies", jwtMiddlewareInstance.Handler(http.HandlerFunc(handler.PostCompany))).Methods("POST")
+	router.Handle("/companies", jwtMiddlewareInstance.Handler(middlewareHandler.IPFIlterMiddleware(http.HandlerFunc(handler.PostCompany)))).Methods("POST")
 	router.Handle("/companies", http.HandlerFunc(handler.ListAllCompanies)).Methods("GET")
 	router.Handle("/companies/{company_id}", http.HandlerFunc(handler.GetCompanyDetails)).Methods("GET")
 	router.Handle("/companies/{company_id}", http.HandlerFunc(handler.PutCompanyDetails)).Methods("PUT")
-	router.Handle("/companies/{company_id}", jwtMiddlewareInstance.Handler(http.HandlerFunc(handler.DeleteCompanyDetails))).Methods("DELETE")
+	router.Handle("/companies/{company_id}", jwtMiddlewareInstance.Handler(middlewareHandler.IPFIlterMiddleware(http.HandlerFunc(handler.DeleteCompanyDetails)))).Methods("DELETE")
 
-	router.HandleFunc("/getjwttoken", authHandler.GenerateToken).Methods("GET")
+	router.HandleFunc("/getjwttoken", middlewareHandler.GenerateToken).Methods("GET")
 
-	muxServerWrapped := getServerConfig(router)
-	muxServerWrapped.ListenAndServe()
+	// muxServerWrapped := getServerConfig(router)
+	http.ListenAndServe(":9294", router)
 }
 
-func getServerConfig(router *mux.Router) *http.Server {
-	apiServer := &http.Server{
-		Addr: "127.0.0.1:9294",
-		Handler: http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-			// get the real IP of the user, see below
-			addr := helpers.GetClientIP(req)
+// func getServerConfig(router *mux.Router) *http.Server {
+// 	apiServer := &http.Server{
+// 		Addr:    "127.0.0.1:9294",
+// 		Handler: http.HandlerFunc(),
+// 	}
 
-			// the actual vaildation - replace with whatever you want
-			if !helpers.IsValidRequest(addr) {
-				http.Error(w, "Blocked", 401)
-				return
-			}
-
-			// pass the request to the mux
-			router.ServeHTTP(w, req)
-		}),
-	}
-
-	return apiServer
-}
+// 	return apiServer
+// }
