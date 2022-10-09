@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -30,10 +31,10 @@ func main() {
 	handler := handlers.NewCompaniesHandler(dbInstance, kafkaProducerInstance)
 
 	middlewareHandler := handlers.NewMiddlewareHandler()
-
+	ctx := context.Background()
 	fmt.Println("started listening on port : ", 9294)
 	router.Handle("/companies", jwtMiddlewareInstance.Handler(middlewareHandler.IPFIlterMiddleware(http.HandlerFunc(handler.PostCompany)))).Methods("POST")
-	router.Handle("/companies", http.HandlerFunc(handler.ListAllCompanies)).Methods("GET")
+	router.Handle("/companies", middlewareHandler.ContextMiddleware(ctx, http.HandlerFunc(handler.ListAllCompanies))).Methods("GET")
 	router.Handle("/companies/{company_id}", http.HandlerFunc(handler.GetCompanyDetails)).Methods("GET")
 	router.Handle("/companies/{company_id}", http.HandlerFunc(handler.PutCompanyDetails)).Methods("PUT")
 	router.Handle("/companies/{company_id}", jwtMiddlewareInstance.Handler(middlewareHandler.IPFIlterMiddleware(http.HandlerFunc(handler.DeleteCompanyDetails)))).Methods("DELETE")

@@ -12,6 +12,7 @@ require (
 	github.com/jackc/pgx/v4 v4.17.2
 	github.com/segmentio/kafka-go v0.4.35
 	github.com/stretchr/testify v1.8.0
+	golang.org/x/net v0.0.0-20220706163947-c90051bbdb60
 )
 
 require (

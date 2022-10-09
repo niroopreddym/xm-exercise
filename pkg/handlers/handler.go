@@ -11,6 +11,7 @@ import (
 	kafka "github.com/niroopreddym/xm-exercise/pkg/kafkaproducer"
 	"github.com/niroopreddym/xm-exercise/pkg/models"
 	"github.com/niroopreddym/xm-exercise/pkg/services"
+	"golang.org/x/net/context"
 )
 
 //CompaniesHandler is the class implementation for HandlerIface Interface
@@ -83,23 +84,38 @@ func (handler *CompaniesHandler) ListAllCompanies(w http.ResponseWriter, r *http
 
 //GetCompanyDetails gets the company details based on filter
 func (handler *CompaniesHandler) GetCompanyDetails(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	id := params["company_id"]
+	ctx, ctxCancel := context.WithCancel(r.Context())
+	go func() {
+		params := mux.Vars(r)
+		id := params["company_id"]
+		companyID, err := strconv.Atoi(id)
+		if err != nil {
+			responseController(w, http.StatusInternalServerError, err)
+			ctxCancel()
+		}
 
-	companyID, err := strconv.Atoi(id)
-	if err != nil {
-		responseController(w, http.StatusInternalServerError, err)
-		return
+		companyDetails, err := handler.CompanyService.GetCompanyDetails(companyID)
+		if err != nil {
+			fmt.Println(err)
+			responseController(w, http.StatusInternalServerError, "Error occured while fetching the company details")
+			ctxCancel()
+		}
+
+		responseController(w, http.StatusOK, companyDetails)
+		ctxCancel()
+	}()
+
+	for {
+		select {
+		case <-ctx.Done():
+			if err := ctx.Err(); err != nil {
+				fmt.Printf("done executing GetCompanyDetails err: %s\n", err)
+			}
+			fmt.Println("message", "client connection has gone away, request got cancelled")
+			return
+		default:
+		}
 	}
-
-	companyDetails, err := handler.CompanyService.GetCompanyDetails(companyID)
-	if err != nil {
-		fmt.Println(err)
-		responseController(w, http.StatusInternalServerError, "Error occured while fetching the company details")
-		return
-	}
-
-	responseController(w, http.StatusOK, companyDetails)
 }
 
 //PutCompanyDetails ...
