@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_PostBankDetails(t *testing.T) {
+func Test_PostCompanyDetails(t *testing.T) {
 	controller := gomock.NewController(t)
 	defer controller.Finish()
 
