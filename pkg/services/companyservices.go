@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/niroopreddym/xm-exercise/database"
-	"github.com/niroopreddym/xm-exercise/models"
+	"github.com/niroopreddym/xm-exercise/pkg/database"
+	"github.com/niroopreddym/xm-exercise/pkg/models"
 )
 
 //DatabaseService is the class implementation for ProductServicesIface interface

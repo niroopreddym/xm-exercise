@@ -8,8 +8,8 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/niroopreddym/xm-exercise/models"
-	"github.com/niroopreddym/xm-exercise/services"
+	"github.com/niroopreddym/xm-exercise/pkg/models"
+	"github.com/niroopreddym/xm-exercise/pkg/services"
 )
 
 //CompaniesHandler is the class implementation for HandlerIface Interface

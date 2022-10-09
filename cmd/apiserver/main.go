@@ -8,8 +8,8 @@ import (
 	jwt "github.com/form3tech-oss/jwt-go"
 	"github.com/gorilla/mux"
 
-	"github.com/niroopreddym/xm-exercise/handlers"
-	"github.com/niroopreddym/xm-exercise/services"
+	"github.com/niroopreddym/xm-exercise/pkg/handlers"
+	"github.com/niroopreddym/xm-exercise/pkg/services"
 )
 
 func main() {

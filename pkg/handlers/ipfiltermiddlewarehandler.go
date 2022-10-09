@@ -3,7 +3,7 @@ package handlers
 import (
 	"net/http"
 
-	"github.com/niroopreddym/xm-exercise/helpers"
+	"github.com/niroopreddym/xm-exercise/pkg/helpers"
 )
 
 //IPFIlterMiddleware ...

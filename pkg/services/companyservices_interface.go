@@ -1,6 +1,6 @@
 package services
 
-import "github.com/niroopreddym/xm-exercise/models"
+import "github.com/niroopreddym/xm-exercise/pkg/models"
 
 //DatabaseServicesIface exposes the public methods to be used by the handler
 type DatabaseServicesIface interface {
