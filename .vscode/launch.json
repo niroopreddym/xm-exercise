@@ -9,7 +9,7 @@
             "type": "go",
             "request": "launch",
             "mode": "debug",
-            "program": "C:\\Users\\niroo\\go\\src\\github.com\\niroopreddym\\xm-exercise\\main.go"
+            "program": "${file}"
         }
     ]
 }

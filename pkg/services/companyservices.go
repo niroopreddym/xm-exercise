@@ -6,6 +6,7 @@ import (
 	"log"
 
 	"github.com/niroopreddym/xm-exercise/pkg/database"
+	kafka "github.com/niroopreddym/xm-exercise/pkg/kafkaproducer"
 	"github.com/niroopreddym/xm-exercise/pkg/models"
 )
 
@@ -33,6 +34,8 @@ func (service *DatabaseService) CreateCompany(company *models.Company) (int, err
 		log.Println(err)
 		return 0, err
 	}
+
+	kafka.PushToKafkaStream(fmt.Sprintf("company with ID:{%v} created", companyID))
 	return companyID, nil
 }
 
@@ -140,5 +143,6 @@ func (service *DatabaseService) DeleteCompanyDetails(companyID int) error {
 		return err
 	}
 
+	kafka.PushToKafkaStream(fmt.Sprintf("company with ID:{%v} deleted", companyID))
 	return nil
 }
