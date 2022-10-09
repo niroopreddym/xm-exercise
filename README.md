@@ -6,3 +6,5 @@
     * eventlisteners using kafka
     * infrastructure spin-up using docker-compose
     * makefile automation
+    * middleware for authentication using JWT
+    * middleware to filter IP requests based on XFF header
