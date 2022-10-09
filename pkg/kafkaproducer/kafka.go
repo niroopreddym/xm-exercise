@@ -9,8 +9,17 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
+//XMKafka provides implementation of kafkaIface
+type XMKafka struct {
+}
+
+//NewXMKafka is ctor
+func NewXMKafka() IKafka {
+	return &XMKafka{}
+}
+
 //PushToKafkaStream ...
-func PushToKafkaStream(msg string) {
+func (xmakfka *XMKafka) PushToKafkaStream(msg string) {
 	conn, err := kafka.DialLeader(context.Background(), "tcp", "localhost:9092", "first_kafka_topic", 0)
 	if err != nil {
 		fmt.Printf("Conn error: %v\n", err)

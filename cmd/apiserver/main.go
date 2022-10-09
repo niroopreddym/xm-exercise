@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/mux"
 
 	"github.com/niroopreddym/xm-exercise/pkg/handlers"
+	kafka "github.com/niroopreddym/xm-exercise/pkg/kafkaproducer"
 	"github.com/niroopreddym/xm-exercise/pkg/services"
 )
 
@@ -24,8 +25,10 @@ func main() {
 	})
 
 	dbInstance := services.NewDatabaseServicesInstance()
+	kafkaProducerInstance := kafka.NewXMKafka()
 	router := mux.NewRouter()
-	handler := handlers.NewCompaniesHandler(dbInstance)
+	handler := handlers.NewCompaniesHandler(dbInstance, kafkaProducerInstance)
+
 	middlewareHandler := handlers.NewMiddlewareHandler()
 
 	fmt.Println("started listening on port : ", 9294)

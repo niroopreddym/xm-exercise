@@ -8,6 +8,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	kafka "github.com/niroopreddym/xm-exercise/pkg/kafkaproducer"
 	"github.com/niroopreddym/xm-exercise/pkg/models"
 	"github.com/niroopreddym/xm-exercise/pkg/services"
 )
@@ -15,12 +16,14 @@ import (
 //CompaniesHandler is the class implementation for HandlerIface Interface
 type CompaniesHandler struct {
 	CompanyService services.DatabaseServicesIface
+	KafkaService   kafka.IKafka
 }
 
 //NewCompaniesHandler instantiates the struct
-func NewCompaniesHandler(dbService *services.DatabaseService) HandlerIface {
+func NewCompaniesHandler(dbService *services.DatabaseService, kafka kafka.IKafka) HandlerIface {
 	return &CompaniesHandler{
 		CompanyService: dbService,
+		KafkaService:   kafka,
 	}
 }
 
@@ -53,6 +56,8 @@ func (handler *CompaniesHandler) PostCompany(w http.ResponseWriter, r *http.Requ
 		responseController(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+
+	handler.KafkaService.PushToKafkaStream(fmt.Sprintf("company with ID:{%v} created", uniqueID))
 
 	responseController(w, http.StatusOK, map[string]string{
 		"companyID": fmt.Sprintf("%v", uniqueID),
@@ -149,6 +154,7 @@ func (handler *CompaniesHandler) DeleteCompanyDetails(w http.ResponseWriter, r *
 		return
 	}
 
+	handler.KafkaService.PushToKafkaStream(fmt.Sprintf("company with ID:{%v} deleted", companyID))
 	responseController(w, http.StatusNoContent, "")
 }
 
