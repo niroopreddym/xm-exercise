@@ -20,3 +20,6 @@ startapiserver:
 
 startKafkaconsumer:
 	go run cmd/kafkadriver/consumer/main.go
+
+gotest:
+	go test ./...
