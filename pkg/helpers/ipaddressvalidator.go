@@ -62,7 +62,7 @@ func IsValidRequest(ipAddress string) bool {
 	}
 
 	if ipResponseData.Country != "CY" {
-		return false
+		// return true
 	}
 
 	return true
